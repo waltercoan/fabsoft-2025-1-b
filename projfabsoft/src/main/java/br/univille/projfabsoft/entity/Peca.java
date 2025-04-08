@@ -1,9 +1,19 @@
 package br.univille.projfabsoft.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Peca {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String codigo;
     private String nome;
     private Double precoUnitario;
+
 
     // Getters e Setters
     public String getCodigo() {

@@ -92,9 +92,9 @@ package br.univille.projfabsoft.entity {
         + setValor(valor: Double): void
     }
 
-    Cliente "1" --> "*" Carro
-    Revisao "1" --> "1" Cliente
-    Revisao "1" --> "1" Carro
+    Carro "*" --> "1" Cliente
+    Revisao "*" --> "1" Cliente
+    Revisao "*" --> "1" Carro
     Revisao "1" --> "*" Peca
     Revisao "1" --> "*" Servico
 }
