@@ -97,3 +97,6 @@ git push -u origin main
 ## Diagrama de classes Entidade (Domínio)
 ![Diagrama](./diagramas/png/classes_projfabsoft.png)
 
+## Clean Architecture
+[Livro](https://integrada.minhabiblioteca.com.br/reader/books/9788550808161/pageid/0)
+![Arquitetura Limpa](./diagramas/CleanArchitecture.jpg)
