@@ -3,6 +3,7 @@ package br.univille.projfabsoft.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +24,7 @@ public class Revisao {
     private String dataEntrada;
     private String dataSaida;
     private Double valor;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_revisao")
     private List<Peca> pecasTrocadas = new ArrayList<>();
     @OneToMany

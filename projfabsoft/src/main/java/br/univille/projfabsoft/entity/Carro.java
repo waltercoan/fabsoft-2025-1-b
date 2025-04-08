@@ -1,5 +1,6 @@
 package br.univille.projfabsoft.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,7 +15,7 @@ public class Carro {
     private String marca;
     private String modelo;
     private String placa;
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REFRESH})
     private Cliente cliente;
 
 
