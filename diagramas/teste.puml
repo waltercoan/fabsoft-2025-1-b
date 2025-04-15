@@ -1,0 +1,95 @@
+@startuml
+package br.univille.projfabsoftcashflow.entity {
+    class Cliente {
+        - Long id
+        - String nome
+        - String endereco
+        - String telefone
+        - String email
+        + Long getId()
+        + void setId(Long id)
+        + String getNome()
+        + void setNome(String nome)
+        + String getEndereco()
+        + void setEndereco(String endereco)
+        + String getTelefone()
+        + void setTelefone(String telefone)
+        + String getEmail()
+        + void setEmail(String email)
+    }
+
+    class Categoria {
+        - String nome
+        + String getNome()
+        + void setNome(String nome)
+    }
+
+    class Transacao {
+        - BigDecimal valor
+        - LocalDate data
+        - String descricao
+        - Categoria categoria
+        + BigDecimal getValor()
+        + void setValor(BigDecimal valor)
+        + LocalDate getData()
+        + void setData(LocalDate data)
+        + String getDescricao()
+        + void setDescricao(String descricao)
+        + Categoria getCategoria()
+        + void setCategoria(Categoria categoria)
+    }
+
+    class Relatorio {
+        - BigDecimal saldoTotal
+        - Map<String, BigDecimal> saldoPorCategoria
+        + BigDecimal getSaldoTotal()
+        + void setSaldoTotal(BigDecimal saldoTotal)
+        + Map<String, BigDecimal> getSaldoPorCategoria()
+        + void setSaldoPorCategoria(Map<String, BigDecimal> saldoPorCategoria)
+    }
+
+    class Simulacao {
+        - BigDecimal impactoGastoExtra
+        - LocalDate mesReferencia
+        + BigDecimal getImpactoGastoExtra()
+        + void setImpactoGastoExtra(BigDecimal impactoGastoExtra)
+        + LocalDate getMesReferencia()
+        + void setMesReferencia(LocalDate mesReferencia)
+    }
+}
+
+package br.univille.projfabsoftcashflow.repository {
+    interface ClienteRepository {
+        + save(Cliente cliente)
+        + findAll(): List<Cliente>
+        + findById(Long id): Optional<Cliente>
+        + deleteById(Long id)
+    }
+}
+
+package br.univille.projfabsoftcashflow.service {
+    interface ClienteService {
+        + Cliente save(Cliente cliente)
+        + List<Cliente> getAll()
+        + Cliente getById(Long id)
+        + Cliente delete(Long id)
+    }
+}
+
+package br.univille.projfabsoftcashflow.service.impl {
+    class ClienteServiceImpl {
+        - ClienteRepository repository
+        + Cliente save(Cliente cliente)
+        + List<Cliente> getAll()
+        + Cliente getById(Long id)
+        + Cliente delete(Long id)
+    }
+}
+
+Cliente "1" --> "*" Transacao : "realiza"
+Transacao "1" --> "1" Categoria : "pertence a"
+Relatorio "1" --> "*" Categoria : "detalha"
+Simulacao "1" --> "1" Relatorio : "baseada em"
+ClienteServiceImpl ..|> ClienteService
+ClienteServiceImpl --> ClienteRepository : "usa"
+@enduml
