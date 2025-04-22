@@ -11,6 +11,21 @@ Content-Type: application/json
     "endereco": "rua lalalalalla 100",
     "telefone": "5555-1234",
     "dataNascimento": "2025-04-15"
-
 }
 
+### API CLIENTE - PUT
+PUT http://localhost:8080/api/v1/clientes/1
+Content-Type: application/json
+
+{
+    "nome": "zezinho da silva sauro",
+    "email": "ze@ze.com.br",
+    "endereco": "rua lalalalalla 100",
+    "telefone": "5555-1234",
+    "dataNascimento": "2025-04-15"
+}
+
+
+### API CLIENTE - DELETE
+DELETE http://localhost:8080/api/v1/clientes/1
+Content-Type: application/json
