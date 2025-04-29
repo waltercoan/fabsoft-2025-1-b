@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 public class Peca {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private String codigo;
     private String nome;
     private Double precoUnitario;
@@ -38,5 +38,13 @@ public class Peca {
 
     public void setPrecoUnitario(Double precoUnitario) {
         this.precoUnitario = precoUnitario;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 public class Servico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private String nomeFuncionario;
     private Integer quantidadeHoras;
     private Double valor;
@@ -37,5 +37,13 @@ public class Servico {
 
     public void setValor(Double valor) {
         this.valor = valor;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

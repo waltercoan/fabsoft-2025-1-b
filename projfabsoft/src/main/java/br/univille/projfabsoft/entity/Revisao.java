@@ -16,7 +16,7 @@ import jakarta.persistence.OneToMany;
 public class Revisao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     @ManyToOne
     private Cliente cliente;
     @ManyToOne
@@ -32,11 +32,11 @@ public class Revisao {
     private List<Servico> servicosRealizados = new ArrayList<>();
 
     // Getters e Setters
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
