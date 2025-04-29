@@ -27,7 +27,7 @@ public class Revisao {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_revisao")
     private List<Peca> pecasTrocadas = new ArrayList<>();
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_revisao")
     private List<Servico> servicosRealizados = new ArrayList<>();
 

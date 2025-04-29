@@ -14,6 +14,15 @@ public class Servico {
     private Integer quantidadeHoras;
     private Double valor;
 
+    public Servico() {
+        
+    }
+    public Servico(long id, String nomeFuncionario, Integer quantidadeHoras, Double valor ) {
+        this.id = id;
+        this.nomeFuncionario = nomeFuncionario;
+        this.quantidadeHoras = quantidadeHoras;
+        this.valor = valor;
+    }
     // Getters e Setters
     public String getNomeFuncionario() {
         return nomeFuncionario;

@@ -13,7 +13,15 @@ public class Peca {
     private String codigo;
     private String nome;
     private Double precoUnitario;
-
+    public Peca() {
+        
+    }
+    public Peca(long id, String codigo, String nome, Double precoUnitario) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
+        this.precoUnitario = precoUnitario;
+    }
 
     // Getters e Setters
     public String getCodigo() {

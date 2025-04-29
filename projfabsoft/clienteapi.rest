@@ -33,10 +33,10 @@ Content-Type: application/json
 
 
 
-### API Carro - GET
+### API CARRO - GET
 GET http://localhost:8080/api/v1/carros
 
-### API CLIENTE - POST
+### API CARRO - POST
 POST http://localhost:8080/api/v1/carros
 Content-Type: application/json
 
@@ -54,7 +54,7 @@ Content-Type: application/json
     }
 }
 
-### API CLIENTE - PUT
+### API CARRO - PUT
 PUT http://localhost:8080/api/v1/carros/1
 Content-Type: application/json
 
@@ -73,6 +73,60 @@ Content-Type: application/json
 }
 
 
-### API CLIENTE - DELETE
+### API CARRO - DELETE
 DELETE http://localhost:8080/api/v1/carros/1
+Content-Type: application/json
+
+
+### API REVISAO - GET
+GET http://localhost:8080/api/v1/revisoes
+
+### API REVISAO - POST
+POST http://localhost:8080/api/v1/revisoes
+Content-Type: application/json
+
+{
+    "cliente": {
+        "id": 1,
+        "nome": "zezinho",
+        "endereco": "rua lalalalalla 100",
+        "telefone": "5555-1234",
+        "email": "ze@ze.com.br",
+        "dataNascimento": "2025-04-15T00:00:00.000+00:00"
+    },
+    "carro": {
+        "id": 1,
+        "marca": "VW",
+        "modelo": "FUSCA ",
+        "placa": "XXX1234",
+        "cliente": {
+        "id": 1,
+        "nome": "zezinho",
+        "endereco": "rua lalalalalla 100",
+        "telefone": "5555-1234",
+        "email": "ze@ze.com.br",
+        "dataNascimento": "2025-04-14"
+        }
+    },
+    "dataEntrada": "2025-04-01",
+    "dataSaida": "2025-04-29",
+    "valor": 1000.50,
+    "pecasTrocadas": [
+        {
+            "codigo": "1234",
+            "nome": "Óleo ELF Evolution 700 STI 10W-40",
+            "precoUnitario": 300
+        }
+    ],
+    "servicosRealizados": [
+        {
+            "nomeFuncionario": "Zezinho",
+            "quantidadeHoras": 100,
+            "valor": 20
+        }
+    ]
+}
+
+### API REVISAO - DELETE
+DELETE http://localhost:8080/api/v1/revisoes/1
 Content-Type: application/json
