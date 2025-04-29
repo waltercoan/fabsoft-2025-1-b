@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 public class Carro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private String marca;
     private String modelo;
     private String placa;
@@ -28,11 +28,11 @@ public class Carro {
     }
 
     // Getters e Setters
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

@@ -29,3 +29,50 @@ Content-Type: application/json
 ### API CLIENTE - DELETE
 DELETE http://localhost:8080/api/v1/clientes/1
 Content-Type: application/json
+
+
+
+
+### API Carro - GET
+GET http://localhost:8080/api/v1/carros
+
+### API CLIENTE - POST
+POST http://localhost:8080/api/v1/carros
+Content-Type: application/json
+
+{
+    "marca": "VW",
+    "modelo": "FUSCA ",
+    "placa": "XXX1234",
+    "cliente": {
+        "id": 1,
+        "nome": "zezinho",
+        "email": "ze@ze.com.br",
+        "endereco": "rua lalalalalla 100",
+        "telefone": "5555-1234",
+        "dataNascimento": "2025-04-15"
+    }
+}
+
+### API CLIENTE - PUT
+PUT http://localhost:8080/api/v1/carros/1
+Content-Type: application/json
+
+{
+    "marca": "VW",
+    "modelo": "FUSCA ",
+    "placa": "XXX1234",
+    "cliente": {
+        "id": 1,
+        "nome": "zezinho",
+        "email": "ze@ze.com.br",
+        "endereco": "rua lalalalalla 100",
+        "telefone": "5555-1234",
+        "dataNascimento": "2025-04-15"
+    }
+}
+
+
+### API CLIENTE - DELETE
+DELETE http://localhost:8080/api/v1/carros/1
+Content-Type: application/json
