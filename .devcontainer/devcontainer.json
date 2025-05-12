@@ -1,0 +1,18 @@
+{
+  "name": "Angular dev container",
+  "dockerFile": "Dockerfile",
+  "appPort": [4000, 4200, 4433, 5000, 8080, 9876],
+  "postCreateCommand": "yarn install",
+  "extensions": [
+    "ms-vscode.vscode-typescript-next",
+    "Angular.ng-template",
+    "dbaeumer.vscode-eslint",
+    "cyrilletuzi.angular-schematics",
+    "vscjava.vscode-java-pack",
+    "vmware.vscode-boot-dev-pack",
+    "humao.rest-client",
+    "jebbs.plantuml",
+    "ms-azuretools.vscode-docker",
+    "cweijan.vscode-database-client2"
+  ],
+}
