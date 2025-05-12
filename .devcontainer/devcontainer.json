@@ -1,6 +1,12 @@
 {
   "name": "Angular dev container",
   "dockerFile": "Dockerfile",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:1": {
+        "version": "latest",
+        "moby": true
+    }
+  },
   "appPort": [4000, 4200, 4433, 5000, 8080, 9876],
   "extensions": [
     "ms-vscode.vscode-typescript-next",
@@ -13,5 +19,5 @@
     "jebbs.plantuml",
     "ms-azuretools.vscode-docker",
     "cweijan.vscode-database-client2"
-  ],
+  ]
 }
