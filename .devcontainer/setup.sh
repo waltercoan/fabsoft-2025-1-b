@@ -6,7 +6,8 @@ apt-get install -y \
   gnupg2 \
   jq \
   sudo \
-  zsh
+  zsh \
+  openjdk-21-jdk
 
 ## add bits needed for GitHub CLI
 apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
@@ -21,3 +22,6 @@ cp -R /root/.oh-my-zsh /home/$USERNAME
 cp /root/.zshrc /home/$USERNAME
 sed -i -e "s/\/root\/.oh-my-zsh/\/home\/$USERNAME\/.oh-my-zsh/g" /home/$USERNAME/.zshrc
 chown -R $USER_UID:$USER_GID /home/$USERNAME/.oh-my-zsh /home/$USERNAME/.zshrc
+
+## setup ANGULAR
+npm install -g @angular/cli@17
