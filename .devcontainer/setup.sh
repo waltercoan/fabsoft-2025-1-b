@@ -25,3 +25,6 @@ chown -R $USER_UID:$USER_GID /home/$USERNAME/.oh-my-zsh /home/$USERNAME/.zshrc
 
 ## setup ANGULAR
 npm install -g @angular/cli@17
+
+## Docker-in-Docker
+curl -sSL https://get.docker.com/ | sh
