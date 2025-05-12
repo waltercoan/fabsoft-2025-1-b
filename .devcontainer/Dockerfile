@@ -15,9 +15,8 @@ EXPOSE 4000 4200 4433 5000 8080 9876
 USER root
 
 
-# Configure `Node.js`/`npm`.
-RUN npm config --global set user root
+WORKDIR /home/
 
+COPY . .
 
-# Go! (And keep going.)
-CMD ["tail", "--follow", "/dev/null"]
+RUN bash ./setup.sh
