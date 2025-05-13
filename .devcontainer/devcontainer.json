@@ -2,9 +2,6 @@
   "name": "Angular dev container",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
   "features": {
-    "ghcr.io/devcontainers-contrib/features/azure-cli:1": {
-      "version": "latest"
-    },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest"
     },
