@@ -1,0 +1,31 @@
+{
+  "name": "Angular dev container",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": true,
+      "installGradle": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "npm install -g @angular/cli",
+  "appPort": [4000, 4200, 4433, 5000, 8080, 9876],
+  "extensions": [
+    "ms-vscode.vscode-typescript-next",
+    "Angular.ng-template",
+    "dbaeumer.vscode-eslint",
+    "cyrilletuzi.angular-schematics",
+    "vscjava.vscode-java-pack",
+    "vmware.vscode-boot-dev-pack",
+    "humao.rest-client",
+    "jebbs.plantuml",
+    "ms-azuretools.vscode-docker",
+    "cweijan.vscode-database-client2"
+  ]
+}
