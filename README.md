@@ -102,3 +102,218 @@ git push -u origin main
 [Livro Arquitetura Limpa](https://integrada.minhabiblioteca.com.br/reader/books/9788550808161/pageid/0)
 
 ![Arquitetura Limpa](./diagramas/CleanArchitecture.jpg)
+
+## Frontend Angular
+
+- Criar o projeto Angular
+```bash
+ng new projfabsoft-frontend
+```
+
+- Acessar a pasta do projeto
+
+```bash
+cd projfabsoft-frontend
+```
+
+- Executar o servidor do Angular
+
+```bash
+ng serve
+```
+- Para acessar o frontend utilize o link [http://localhost:4200](http://localhost:4200)
+
+- Instalação do Bootstrap
+
+```bash
+npm install bootstrap
+```
+
+- No arquivo angular.json [🔗](./projfabsoft-frontend/angular.json)
+
+```json
+"styles": [
+    "src/styles.css",
+    "node_modules/bootstrap/dist/css/bootstrap.css"
+],
+"scripts": [
+    "node_modules/bootstrap/dist/js/bootstrap.js"
+]
+```
+
+### Gerando a primeira tela de Cliente 
+
+- Gerando o componente do Angular
+
+```bash
+ng generate component cliente
+```
+
+- Criando a interface gráfica HTML /src/app/cliente/cliente.component.html [🔗](./projfabsoft-frontend/src/app/cliente/cliente.component.html)
+
+```html
+<main class="container">
+    <table class="table">
+        ....
+    </table>
+</main>
+```
+
+- Criando a classe Model
+
+```bash
+ng generate class model/cliente
+```
+
+- Código da classe /src/app/model/cliente.ts [🔗](./projfabsoft-frontend/src/app/model/cliente.ts)
+
+```ts
+export class Cliente {
+    id: number;
+    nome: string;
+    endereco: string;
+    telefone: string;
+    email: string;
+    dataNascimento: Date;
+}
+```
+
+- Configurar o arquivo tsconfig.json [🔗](./projfabsoft-frontend/tsconfig.json) para suportar a não inicialização dos atributos 
+
+```bash
+"compilerOptions": {
+    "strictPropertyInitialization": false,
+} 
+```
+
+- Gerar o serviço
+
+```bash
+ng generate service service/cliente
+```
+
+- Codigo do serviço /src/app/service/cliente.service.ts [🔗](./projfabsoft-frontend/src/app/service/cliente.service.ts)
+
+```ts
+import { Injectable } from '@angular/core';
+import { Cliente } from '../model/cliente';
+import { HttpClient } from '@angular/common/http';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ClienteService {
+  apiURL = "http://localhost:8080/api/v1/clientes";
+  
+  constructor(private http:HttpClient) { }
+
+  getClientes(){
+    return this.http.get<Cliente[]>(this.apiURL);
+  }
+
+}
+```
+
+- Alterar o arquivo /src/app/app.component.html [🔗](./projfabsoft-frontend/src/app/app.component.html) para gerar apenas a tela dos componentes
+
+```html
+<router-outlet />
+```
+
+- Modificar o código do componente /src/app/cliente/cliente.component.ts [🔗](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) para chamar o serviço e guardar a lista de clientes em um atributo
+
+```ts
+import { Component } from '@angular/core';
+import { Cliente } from '../model/cliente';
+import { ClienteService } from '../service/cliente.service';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-cliente',
+  imports: [HttpClientModule,CommonModule],
+  templateUrl: './cliente.component.html',
+  styleUrl: './cliente.component.css',
+  providers: [ClienteService]
+})
+export class ClienteComponent {
+  listaClientes: Cliente[] = [];
+
+  constructor(private clienteService: ClienteService) {}
+
+  ngOnInit() {
+    console.log("Carregando clientes...");
+    this.clienteService.getClientes().subscribe(clientes => {
+      this.listaClientes = clientes;
+    });
+  }
+}
+```
+
+- Modificar o arquivo /src/app/cliente/cliente.component.html [🔗](./projfabsoft-frontend/src/app/cliente/cliente.component.html) para desenhar a tabela de clientes
+
+```html
+<main class="container">
+    <h2>Clientes</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let umCliente of listaClientes">
+                <td>{{umCliente.nome}}</td>
+            </tr>
+        </tbody>
+    </table>
+</main>
+```
+
+- Modificar o arquivo /src/app/app.routes.ts [🔗](./projfabsoft-frontend/src/app/app.routes.ts) para incluir a rota para o componente
+
+```ts
+import { Routes } from '@angular/router';
+import { ClienteComponent } from './cliente/cliente.component';
+export const routes: Routes = [
+    { path: 'clientes', component: ClienteComponent }
+];
+```
+
+- Rodar a aplicação
+
+```bash
+ng serve
+```
+
+- [Cross-origin resource sharing](https://pt.wikipedia.org/wiki/Cross-origin_resource_sharing)
+
+- No projeto Backend Java Spring Boot crie um pacote chamado br.univille.projfabsoft.config, e dentro dele uma classe WebConfig.java [🔗](./projfabsoft/src/main/java/br/univille/projfabsoft/config/WebConfig.java) com o seguinte código:
+
+
+```java
+package br.univille.projfabsoft.config;
+
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer  {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedHeaders("*")
+                .allowedOriginPatterns("*")
+                .allowedOrigins("*")
+                .allowedMethods("*")
+                .maxAge(1800);
+
+    }
+}
+```
