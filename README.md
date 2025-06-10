@@ -317,3 +317,43 @@ public class WebConfig implements WebMvcConfigurer  {
     }
 }
 ```
+
+## Criação da tela de cadastro de clientes
+
+- Alterar o arquivo /src/app/cliente/cliente.component.ts para importar o RouterLink
+
+```ts
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-cliente',
+  imports: [HttpClientModule, CommonModule, RouterLink],
+  templateUrl: './cliente.component.html',
+  styleUrl: './cliente.component.css',
+  providers: [ClienteService]
+})
+```
+- Alterar o arquivo /src/app/cliente/cliente.component.html criar o botao para a nova tela de formulário
+
+```html
+<a routerLink="/clientes/novo" class="btn btn-primary">Novo</a>
+```
+
+- Alterar o arquivo /app/app.routes.ts para registrar a rota da nova tela
+
+```ts
+import { Routes } from '@angular/router';
+import { ClienteComponent } from './cliente/cliente.component';
+import { FormClienteComponent } from './form-cliente/form-cliente.component';
+
+export const routes: Routes = [
+    { path: 'clientes', component: ClienteComponent},
+    { path: 'clientes/novo', component: FormClienteComponent},
+];
+```
+
+- Abrir o console e digitar o comando para criar um novo componente que será a tela de cadastro
+
+```bash
+ng generate component form-cliente
+```
