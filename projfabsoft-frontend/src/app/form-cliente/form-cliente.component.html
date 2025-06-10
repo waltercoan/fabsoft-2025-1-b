@@ -1,1 +1,16 @@
-<p>form-cliente works!</p>
+<main class="container">
+    <h2>Cliente</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label for="txtNome">Nome</label>    
+                <input type="text" 
+                    [(ngModel)]="cliente.nome"
+                    class="form-control"
+                    id="txtNome">
+            </div>
+        </div>
+        <button (click)="salvar()" 
+        class="btn btn-primary">Salvar</button>
+    </div>
+</main>
