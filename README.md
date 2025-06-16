@@ -320,23 +320,31 @@ public class WebConfig implements WebMvcConfigurer  {
 
 ## Criação da tela de cadastro de clientes
 
-- Alterar o arquivo /src/app/cliente/cliente.component.ts para importar o RouterLink
+- Alterar o arquivo /src/app/cliente/cliente.component.ts para importar o Router e criar a função novo()
 
 ```ts
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cliente',
-  imports: [HttpClientModule, CommonModule, RouterLink],
+  imports: [HttpClientModule, CommonModule],
   templateUrl: './cliente.component.html',
   styleUrl: './cliente.component.css',
-  providers: [ClienteService]
+  providers: [ClienteService, Router]
 })
+
+constructor(
+    private clienteService:ClienteService,
+    private router:Router
+){}
+novo(){
+  this.router.navigate(['clientes/novo']);
+}    
 ```
 - Alterar o arquivo /src/app/cliente/cliente.component.html criar o botao para a nova tela de formulário
 
 ```html
-<a routerLink="/clientes/novo" class="btn btn-primary">Novo</a>
+<a (click)="novo()" class="btn btn-primary">Novo</a>
 ```
 
 - Alterar o arquivo /app/app.routes.ts para registrar a rota da nova tela
@@ -439,4 +447,137 @@ export class FormClienteComponent {
         class="btn btn-primary">Salvar</button>
     </div>
 </main>
+```
+
+## Funcionalidade de ALTERAR
+
+- Modifique o controlador [ClienteController](./projfabsoft/src/main/java/br/univille/projfabsoft/controller/ClienteController.java) no projeto Java Spring Boot para incluir um novo endpoint para buscar um único cliente pelo ID
+
+```java
+@RestController
+@RequestMapping("/api/v1/clientes")
+public class ClienteController {
+
+    @GetMapping("/{id}")	
+    public ResponseEntity<Cliente> getClienteId(@PathVariable Long id){
+        var cliente = service.getById(id);
+
+        return new ResponseEntity<Cliente>(cliente, HttpStatus.OK);
+    }
+```
+
+- Retorne ao projeto ANGULAR e altere o service do [cliente.service.ts](./projfabsoft_frontend/src/app/service/cliente.service.ts) para criar o método para buscar o cliente pelo ID
+
+```ts
+  getClienteById(id: any) {
+    return this.http.get<Cliente>(this.apiURL + '/' + id);
+  }
+```
+
+- Altere a tela do Cliente [cliente.component.html](./projfabsoft_frontend/src/app/cliente/cliente.component.html) para incluir o botao ALTERAR na tela
+
+```html
+      <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Endereço</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Data Nascimento</th>
+                <th></th> <!-- ALTERADO-->
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let umCliente of listaClientes">
+                <td>{{umCliente.nome}}</td>
+                <td>{{umCliente.endereco}}</td>
+                <td>{{umCliente.telefone}}</td>
+                <td>{{umCliente.email}}</td>
+                <td>{{umCliente.dataNascimento | date:'dd/MM/yyyy'}}</td>
+                <td><a (click)="alterar(umCliente)" 
+                    class="btn btn-secondary">Alterar</a></td> <!-- ALTERADO-->
+            </tr>
+        </tbody>
+    </table>
+```
+
+- Altere o controlador da tela [cliente.component.ts](./projfabsoft_frontend/src/app/cliente/cliente.component.ts) para incluir a função alterar()
+
+```ts
+  alterar(cliente:Cliente){
+      this.router.navigate(['clientes/alterar', cliente.id]);
+  }
+```
+
+- Altere o arquivo de rotas da aplicação [app.routes.ts](./projfabsoft_frontend/src/app/app.routes.ts) para incluir a nova rota de alterar
+
+```ts
+import { Routes } from '@angular/router';
+import { ClienteComponent } from './cliente/cliente.component';
+import { FormClienteComponent } from './form-cliente/form-cliente.component';
+
+export const routes: Routes = [
+    {path: 'clientes', component: ClienteComponent},
+    {path: 'clientes/novo', component: FormClienteComponent},
+    {path: 'clientes/alterar/:id', component: FormClienteComponent} //ALTERADO
+];
+```
+
+- Altere o controlador do formulário do cliente [form-cliente.component.ts](./projfabsoft_frontend/src/app/form-cliente/form-cliente.component.ts) para receber o id do cliente, chamar o serviço do cliente e mostrar em tela os dados do cliente retornado pelo backend
+
+```ts
+import { Component } from '@angular/core';
+import { Cliente } from '../model/cliente';
+import { ClienteService } from '../service/cliente.service';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router'; //ALTERADO
+
+@Component({
+  selector: 'app-form-cliente',
+  imports: [HttpClientModule, CommonModule, FormsModule],
+  templateUrl: './form-cliente.component.html',
+  styleUrl: './form-cliente.component.css',
+  providers: [ClienteService, Router]
+})
+export class FormClienteComponent {
+    cliente:Cliente = new Cliente();
+
+    constructor(
+      private clienteService: ClienteService,
+      private router: Router,
+      private activeRouter: ActivatedRoute //ALTERADO
+    ) {
+        //ALTERADO
+        const id = this.activeRouter.snapshot.paramMap.get('id');
+        
+        if (id) {
+          this.clienteService.getClienteById(id).subscribe(cliente => {
+            this.cliente = cliente;
+        });
+        //ALTERADO
+      }
+    }
+
+    salvar(){
+      this.clienteService.saveCliente(this.cliente)
+          .subscribe( res => {
+            this.router.navigate(['clientes']);
+          });
+    }
+
+}
+```
+
+- Modifique o service do cliente [cliente.service.ts](./projfabsoft_frontend/src/app/service/cliente.service.ts) para na função saveCliente() verificar se a propriedade id estiver preenchida, chamar o método PUT da API.
+
+```ts
+  saveCliente(cliente:Cliente){
+    if(cliente.id){
+      return this.http.put(this.apiURL + '/' + cliente.id, cliente);
+    }
+    return this.http.post(this.apiURL,cliente);
+  }
 ```
