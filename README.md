@@ -619,6 +619,19 @@ excluirCliente(id: any){
 </div>
 ```
 
+- Alterar o arquivo [cliente.component.html](./projfabsoft-frontend/src/app/cliente/cliente.component.html) para incluir o código HTML necessário para que o botao excluir seja apresentado em cada cliente
+
+```html
+<td><a (click)="alterar(umCliente)" 
+    class="btn btn-secondary">Alterar</a>
+    <!--botao excluir -->
+    <a (click)="abrirConfirmacao(umCliente)" 
+    class="btn btn-danger">Excluir</a>
+    <!--botao excluir -->
+</td>
+```
+
+
 - Alterar o arquivo [cliente.component.ts](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) para importar os seguintes objetos
 
 ```ts
