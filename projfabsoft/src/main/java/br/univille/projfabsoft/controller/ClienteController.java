@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.univille.projfabsoft.entity.Cliente;
 import br.univille.projfabsoft.service.ClienteService;
+import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("/api/v1/clientes")
@@ -30,6 +32,15 @@ public class ClienteController {
 
         return new ResponseEntity<List<Cliente>>(listaClientes, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Cliente> getClienteId(@PathVariable long id){
+        var umCliente = service.getById(id);
+
+        return new ResponseEntity<Cliente>(umCliente, HttpStatus.OK);
+    }
+
+
 
     @PostMapping
     public ResponseEntity<Cliente> postCliente(@RequestBody Cliente cliente){
