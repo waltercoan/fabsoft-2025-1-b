@@ -25,5 +25,9 @@ export class ClienteService {
   getClienteById(id: any) {
     return this.http.get<Cliente>(this.apiURL + '/' + id);
   }
+  
+  excluirCliente(id: any){
+    return this.http.delete<Cliente>(this.apiURL + '/' + id);
+  }
 
 }

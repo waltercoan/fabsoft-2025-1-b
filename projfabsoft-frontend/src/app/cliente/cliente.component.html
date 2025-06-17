@@ -23,9 +23,30 @@
                 <td>{{umCliente.dataNascimento | date:'dd/MM/yyyy'}}</td>
 
                 <td><a (click)="alterar(umCliente)" 
-                    class="btn btn-secondary">Alterar</a></td>
+                    class="btn btn-secondary">Alterar</a>
+                    <a (click)="abrirConfirmacao(umCliente)" 
+                    class="btn btn-danger">Excluir</a>
+                </td>
             </tr>
         </tbody>
-
     </table>
 </main>
+
+
+
+<div class="modal fade" #myModal tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir cliente</h5>
+            </div>
+            <div class="modal-body">
+            Confirma a exclusão do cliente?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharConfirmacao()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="confirmarExclusao()">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>

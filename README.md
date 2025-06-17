@@ -581,3 +581,91 @@ export class FormClienteComponent {
     return this.http.post(this.apiURL,cliente);
   }
 ```
+
+## Funcionalidade de EXCLUIR
+
+-  Abrir o terminal e digitar o comando abaixo para instalar a definição de tipos do bootstrap no typescript
+
+```bash
+npm i @types/bootstrap
+```
+
+- Alterar o arquivo [cliente.service.ts](./projfabsoft-frontend/src/app/service/cliente.service.ts) para incluir a função de excluir cliente e chamar o método delete da API no backend
+
+```ts
+excluirCliente(id: any){
+  return this.http.delete<Cliente>(this.apiURL + '/' + id);
+}
+```
+
+- Alterar o arquivo [cliente.component.html](./projfabsoft-frontend/src/app/cliente/cliente.component.html) para incluir o código HTML necessário para que o bootstrap crie uma janela de confirmação (MODAL)
+
+```html
+<div class="modal fade" #myModal tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir cliente</h5>
+            </div>
+            <div class="modal-body">
+            Confirma a exclusão do cliente?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharConfirmacao()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="confirmarExclusao()">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+- Alterar o arquivo [cliente.component.ts](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) para importar os seguintes objetos
+
+```ts
+// MANTER OS IMPORTS JA EXISTENTES
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import * as bootstrap from 'bootstrap';
+```
+
+- Ainda no arquivo [cliente.component.ts](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) criar duas variáveis para encontrar a referencia da janela de confirmação modal do bootstrap
+
+```ts
+@ViewChild('myModal') modalElement!: ElementRef;
+private modal!: bootstrap.Modal;
+
+private clienteSelecionado!: Cliente;
+```
+
+- Ainda no arquivo [cliente.component.ts](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) criar o código das funções para abrir e fechar a janela de confirmação
+
+```ts
+abrirConfirmacao(cliente:Cliente) {
+    this.clienteSelecionado = cliente;
+    this.modal = new bootstrap.Modal(this.modalElement.nativeElement);
+    this.modal.show();
+}
+
+fecharConfirmacao() {
+  this.modal.hide();
+}
+```
+
+- Ainda no arquivo [cliente.component.ts](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) criar o código da função confirmar exclusão que deverá chamar o service para excluir o registro e em caso de sucesso, fechar a janela e buscar novamente todos os clientes no backend para atualizar a tabela.
+
+```ts
+confirmarExclusao() {
+    this.clienteService.excluirCliente(this.clienteSelecionado.id).subscribe(
+        () => {
+            this.fecharConfirmacao();
+            this.clienteService.getClientes().subscribe(
+              clientes => {
+                this.listaClientes = clientes;
+              }
+            );
+        },
+        error => {
+            console.error('Erro ao excluir cliente:', error);
+        }
+    );
+}
+```
