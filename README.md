@@ -466,7 +466,7 @@ public class ClienteController {
     }
 ```
 
-- Retorne ao projeto ANGULAR e altere o service do [cliente.service.ts](./projfabsoft_frontend/src/app/service/cliente.service.ts) para criar o método para buscar o cliente pelo ID
+- Retorne ao projeto ANGULAR e altere o service do [cliente.service.ts](./projfabsoft-frontend/src/app/service/cliente.service.ts) para criar o método para buscar o cliente pelo ID
 
 ```ts
   getClienteById(id: any) {
@@ -474,7 +474,7 @@ public class ClienteController {
   }
 ```
 
-- Altere a tela do Cliente [cliente.component.html](./projfabsoft_frontend/src/app/cliente/cliente.component.html) para incluir o botao ALTERAR na tela
+- Altere a tela do Cliente [cliente.component.html](./projfabsoft-frontend/src/app/cliente/cliente.component.html) para incluir o botao ALTERAR na tela
 
 ```html
       <table class="table">
@@ -502,7 +502,7 @@ public class ClienteController {
     </table>
 ```
 
-- Altere o controlador da tela [cliente.component.ts](./projfabsoft_frontend/src/app/cliente/cliente.component.ts) para incluir a função alterar()
+- Altere o controlador da tela [cliente.component.ts](./projfabsoft-frontend/src/app/cliente/cliente.component.ts) para incluir a função alterar()
 
 ```ts
   alterar(cliente:Cliente){
@@ -510,7 +510,7 @@ public class ClienteController {
   }
 ```
 
-- Altere o arquivo de rotas da aplicação [app.routes.ts](./projfabsoft_frontend/src/app/app.routes.ts) para incluir a nova rota de alterar
+- Altere o arquivo de rotas da aplicação [app.routes.ts](./projfabsoft-frontend/src/app/app.routes.ts) para incluir a nova rota de alterar
 
 ```ts
 import { Routes } from '@angular/router';
@@ -524,7 +524,7 @@ export const routes: Routes = [
 ];
 ```
 
-- Altere o controlador do formulário do cliente [form-cliente.component.ts](./projfabsoft_frontend/src/app/form-cliente/form-cliente.component.ts) para receber o id do cliente, chamar o serviço do cliente e mostrar em tela os dados do cliente retornado pelo backend
+- Altere o controlador do formulário do cliente [form-cliente.component.ts](./projfabsoft-frontend/src/app/form-cliente/form-cliente.component.ts) para receber o id do cliente, chamar o serviço do cliente e mostrar em tela os dados do cliente retornado pelo backend
 
 ```ts
 import { Component } from '@angular/core';
@@ -571,7 +571,7 @@ export class FormClienteComponent {
 }
 ```
 
-- Modifique o service do cliente [cliente.service.ts](./projfabsoft_frontend/src/app/service/cliente.service.ts) para na função saveCliente() verificar se a propriedade id estiver preenchida, chamar o método PUT da API.
+- Modifique o service do cliente [cliente.service.ts](./projfabsoft-frontend/src/app/service/cliente.service.ts) para na função saveCliente() verificar se a propriedade id estiver preenchida, chamar o método PUT da API.
 
 ```ts
   saveCliente(cliente:Cliente){
@@ -682,3 +682,4 @@ confirmarExclusao() {
     );
 }
 ```
+
