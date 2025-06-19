@@ -1,0 +1,48 @@
+<main class="container">
+    <h2>Revisões</h2>
+    <a (click)="novo()" class="btn btn-primary">Novo</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Data Entrada</th>
+                <th>Data Saída</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let umaRevisao of listaRevisoes">
+                <td>{{umaRevisao.dataEntrada | date:'dd/MM/yyyy'}}</td>
+                <td>{{umaRevisao.dataSaida | date:'dd/MM/yyyy'}}</td>
+                <td>{{umaRevisao.cliente !== null ? umaRevisao.cliente.nome : ''}}</td>
+                <td>{{umaRevisao.valor}}</td>
+                <td><a (click)="alterar(umaRevisao)" 
+                    class="btn btn-secondary">Alterar</a>
+                    &nbsp;
+                    <a (click)="abrirConfirmacao(umaRevisao)" 
+                        class="btn btn-danger">Excluir</a>
+                
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+</main>
+
+<div class="modal fade" #myModal tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir Revisão</h5>
+            </div>
+            <div class="modal-body">
+            Confirma a exclusão da Revisão?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharConfirmacao()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="confirmarExclusao()">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>

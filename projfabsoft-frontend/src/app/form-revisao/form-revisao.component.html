@@ -1,0 +1,95 @@
+<main class="container">
+    <h2>Revisão</h2>
+    <div class="card">
+        <div class="card-body">
+
+            <div class="form-group">
+                <label for="txtCliente">Cliente</label>
+                <select id="txtCliente" [(ngModel)]="revisao.cliente" class="form-select" [compareWith]="comparaClientes">
+                    <option *ngFor="let umCliente of listaClientes" [ngValue]="umCliente">{{ umCliente.nome }}</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="txtDataEntrada">Data Entrada</label>
+                <input type="date" [(ngModel)]="revisao.dataEntrada" 
+                class="form-control" id="txtDataEntrada">
+            </div>
+
+            <div class="form-group">
+                <label for="txtDataSaida">Data Saída</label>
+                <input type="date" [(ngModel)]="revisao.dataSaida" 
+                class="form-control" id="txtDataSaida">
+            </div>
+
+            <div class="form-group">
+                <label for="txtValor">Valor</label>
+                <input type="number" [(ngModel)]="revisao.valor" 
+                class="form-control" id="txtValor">
+            </div>
+            <br>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Peças</h5>
+                    <a (click)="incluirPeca()" 
+                        class="btn btn-secondary">Incluir Peça</a>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Preço Unitário</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let umaPeca of revisao.pecasTrocadas">
+                                <td>{{umaPeca.codigo}}</td>
+                                <td>{{umaPeca.nome}}</td>
+                                <td>{{umaPeca.precoUnitario}}</td>
+                                <td>
+                                    <a (click)="excluirPeca(umaPeca)" 
+                                        class="btn btn-danger">Excluir</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+        <button (click)="salvar()"
+            class="btn btn-primary">Salvar</button>
+
+    </div>
+</main>
+
+<div class="modal fade" #myModalPeca tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Peça</h5>
+            </div>
+            <div class="form-group">
+                <label for="txtPecaCodigo">Código</label>
+                <input type="text" [(ngModel)]="peca.codigo" 
+                    class="form-control" id="txtPecaCodigo">
+            </div>
+            <div class="form-group">
+                <label for="txtPecaNome">Nome</label>
+                <input type="text" [(ngModel)]="peca.nome" 
+                    class="form-control" id="txtPecaNome">
+            </div>
+            <div class="form-group">
+                <label for="txtPecaPrecoUnitario">Preço Unitário</label>
+                <input type="number" [(ngModel)]="peca.precoUnitario" 
+                    class="form-control" id="txtPecaPrecoUnitario">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="fecharConfirmacaoPeca()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="salvaPeca()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>

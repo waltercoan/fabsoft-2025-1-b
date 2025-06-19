@@ -778,3 +778,591 @@ export class FormCarroComponent {
 </div>
 ```
 
+## Funcionalidade de UM PARA MUITOS - Cadastro Pai/Filho
+
+- No projeto Angular, criar as classes Model para cada uma das entidades do Java envolvidas na tela.
+
+```ts
+export class Peca {
+    id: number;
+    codigo: string;
+    nome: string;
+    precoUnitario: number;
+}
+```
+
+
+```ts
+export class Servico {
+    id: number;
+    nomeFuncionario: string;
+    quantidadeHoras: number;
+    valor: number;
+}
+```
+
+```ts
+import { Cliente } from "./cliente";
+import { Peca } from "./peca";
+import { Servico } from "./servico";
+
+export class Revisao {
+    id: number;
+    cliente: Cliente;
+    dataEntrada: Date;
+    dataSaida: Date;
+    valor: number;
+    pecasTrocadas: Peca[];
+    servicosRealizados: Servico[];
+}
+```
+
+ - Criar a classe de serviço apenas para a entidade principal da tela, neste caso a Revisão. Por que? Porquê as instâncias das classes Peça e Serviço serão salvas junto com a Revisão.
+
+```bash
+ng generate service service/revisao
+```
+
+```ts
+import { Injectable } from '@angular/core';
+import { Revisao } from '../model/revisao';
+import { Peca } from '../model/peca';
+import { Servico } from '../model/servico';
+import { HttpClient } from '@angular/common/http';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RevisaoService {
+
+  apiURL = "http://localhost:8080/api/v1/revisoes";
+
+  constructor(private http:HttpClient) { }
+
+  getRevisoes(){
+     return this.http.get<Revisao[]>(this.apiURL);
+  }
+  getRevisaoById(id: any) {
+    return this.http.get<Revisao>(this.apiURL + '/' + id);
+  }
+  saveRevisao(revisao:Revisao){
+    if(revisao.id){
+      return this.http.put(this.apiURL + '/' + revisao.id, revisao);
+    }
+    return this.http.post(this.apiURL,revisao);
+  }
+
+  excluirRevisao(id: any){
+    return this.http.delete<Revisao>(this.apiURL + '/' + id);
+  }
+}
+```
+
+- Construir o componente da tela principal da revisão.
+
+```bash
+ng generate component revisao
+```
+
+- Registar o componente no arquivo [app.routes.ts](./projfabsoft-frontend/src/app/app.routes.ts)
+
+```ts
+import { Routes } from '@angular/router';
+import { ClienteComponent } from './cliente/cliente.component';
+import { FormClienteComponent } from './form-cliente/form-cliente.component';
+import { CarroComponent } from './carro/carro.component';
+import { FormCarroComponent } from './form-carro/form-carro.component';
+import { RevisaoComponent } from './revisao/revisao.component';
+
+export const routes: Routes = [
+    {path: 'clientes', component: ClienteComponent},
+    {path: 'clientes/novo', component: FormClienteComponent},
+    {path: 'clientes/alterar/:id', component: FormClienteComponent},
+
+    {path: 'carros', component: CarroComponent},
+    {path: 'carros/novo', component: FormCarroComponent},
+    {path: 'carros/alterar/:id', component: FormCarroComponent},
+
+    {path: 'revisoes', component: RevisaoComponent} //ALTERAR AQUI
+
+];
+```
+
+- Criar o código html do componente [revisao.component.ts](./projfabsoft-frontend/src/app/revisao/revisao.component.html)
+
+```html
+<main class="container">
+    <h2>Revisões</h2>
+    <a (click)="novo()" class="btn btn-primary">Novo</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Data Entrada</th>
+                <th>Data Saída</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let umaRevisao of listaRevisoes">
+                <td>{{umaRevisao.dataEntrada | date:'dd/MM/yyyy'}}</td>
+                <td>{{umaRevisao.dataSaida | date:'dd/MM/yyyy'}}</td>
+                <td>{{umaRevisao.cliente !== null ? umaRevisao.cliente.nome : ''}}</td>
+                <td>{{umaRevisao.valor}}</td>
+                <td><a (click)="alterar(umaRevisao)" 
+                    class="btn btn-secondary">Alterar</a>
+                    &nbsp;
+                    <a (click)="abrirConfirmacao(umaRevisao)" 
+                        class="btn btn-danger">Excluir</a>
+                
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+</main>
+
+<div class="modal fade" #myModal tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir Revisão</h5>
+            </div>
+            <div class="modal-body">
+            Confirma a exclusão da Revisão?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharConfirmacao()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="confirmarExclusao()">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+- Criar o código do controlador [revisao.component.ts](./projfabsoft-frontend/src/app/revisao/revisao.component.ts) similar ao cadastro simples
+
+```ts
+import { Component,ElementRef, ViewChild } from '@angular/core';
+import { Revisao } from '../model/revisao';
+import { RevisaoService } from '../service/revisao.service';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import * as bootstrap from 'bootstrap';
+
+@Component({
+  selector: 'app-revisao',
+  imports: [HttpClientModule, CommonModule],
+  templateUrl: './revisao.component.html',
+  styleUrl: './revisao.component.css',
+  providers: [RevisaoService, Router]
+})
+export class RevisaoComponent {
+    public listaRevisoes:Revisao[] = [];
+
+    @ViewChild('myModal') modalElement!: ElementRef;
+    private modal!: bootstrap.Modal;
+
+    private revisaoSelecionada!: Revisao;
+        
+    constructor(
+      private revisaoService:RevisaoService,
+      private router:Router
+    ){}
+
+    ngOnInit(): void {
+      this.revisaoService.getRevisoes().subscribe(resposta => {
+          this.listaRevisoes = resposta;
+      })
+    }
+    novo(){
+      this.router.navigate(['revisoes/novo']);
+    }
+    alterar(revisao:Revisao){
+      this.router.navigate(['revisoes/alterar', revisao.id]);
+    }
+
+    abrirConfirmacao(revisao:Revisao) {
+        this.revisaoSelecionada = revisao;
+        this.modal = new bootstrap.Modal(this.modalElement.nativeElement);
+        this.modal.show();
+    }
+
+    fecharConfirmacao() {
+      this.modal.hide();
+    }
+
+
+    confirmarExclusao() {
+        this.revisaoService.excluirRevisao(this.revisaoSelecionada.id).subscribe(
+            () => {
+                this.fecharConfirmacao();
+                this.revisaoService.getRevisoes().subscribe(
+                  revisoes => {
+                    this.listaRevisoes = revisoes;
+                  }
+                );
+            },
+            error => {
+                console.error('Erro ao excluir revisão:', error);
+            }
+        );
+    }
+}
+```
+
+- Crie o componente para o formulário da tela de revisão
+
+```bash
+ng generate component form-revisao
+```
+
+- Registre as rotas no arquivo [app.routes.ts](./projfabsoft-frontend/src/app/app.routes.ts)
+
+```ts
+import { Routes } from '@angular/router';
+import { ClienteComponent } from './cliente/cliente.component';
+import { FormClienteComponent } from './form-cliente/form-cliente.component';
+import { CarroComponent } from './carro/carro.component';
+import { FormCarroComponent } from './form-carro/form-carro.component';
+import { RevisaoComponent } from './revisao/revisao.component';
+import { FormRevisaoComponent } from './form-revisao/form-revisao.component';
+
+export const routes: Routes = [
+    {path: 'clientes', component: ClienteComponent},
+    {path: 'clientes/novo', component: FormClienteComponent},
+    {path: 'clientes/alterar/:id', component: FormClienteComponent},
+
+    {path: 'carros', component: CarroComponent},
+    {path: 'carros/novo', component: FormCarroComponent},
+    {path: 'carros/alterar/:id', component: FormCarroComponent},
+
+    {path: 'revisoes', component: RevisaoComponent},
+    {path: 'revisoes/novo', component: FormRevisaoComponent}, //ALTERACAO AQUI
+    {path: 'revisoes/alterar/:id', component: FormRevisaoComponent} //ALTERACAO AQUI
+
+];
+```
+
+- Implemete o formulário da Revisão [form-revisao.component.html](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.html) apenas com os atributos de tipos primitivos, as associações vamos fazer em seguida:
+
+
+```html<main class="container">
+    <h2>Revisão</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label for="txtDataEntrada">Data Entrada</label>
+                <input type="date" [(ngModel)]="revisao.dataEntrada" 
+                class="form-control" id="txtDataEntrada">
+            </div>
+
+            <div class="form-group">
+                <label for="txtDataSaida">Data Saída</label>
+                <input type="date" [(ngModel)]="revisao.dataSaida" 
+                class="form-control" id="txtDataSaida">
+            </div>
+
+            <div class="form-group">
+                <label for="txtValor">Valor</label>
+                <input type="number" [(ngModel)]="revisao.valor" 
+                class="form-control" id="txtValor">
+            </div>
+
+            
+        </div>
+
+        <button (click)="salvar()"
+            class="btn btn-primary">Salvar</button>
+
+    </div>
+</main>
+```
+
+-  Implemente o controlador do formulário [form-revisao.component.ts](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.ts) de Revisão idêntico ao controlador do cadastro simples.
+
+```ts
+import { Component } from '@angular/core';
+import { Revisao } from '../model/revisao';
+import { RevisaoService } from '../service/revisao.service';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+
+@Component({
+  selector: 'app-form-revisao',
+  imports: [HttpClientModule, CommonModule, FormsModule],
+  templateUrl: './form-revisao.component.html',
+  styleUrl: './form-revisao.component.css',
+  providers: [RevisaoService, Router]
+})
+
+export class FormRevisaoComponent {
+    revisao:Revisao = new Revisao();
+
+    constructor(
+      private revisaoService: RevisaoService,
+      private router: Router,
+      private activeRouter: ActivatedRoute
+    ) {
+        const id = this.activeRouter.snapshot.paramMap.get('id');
+        
+        if (id) {
+          this.revisaoService.getRevisaoById(id).subscribe(revisao => {
+            this.revisao = revisao;
+        });
+      }
+    }
+
+    salvar(){
+      this.revisaoService.saveRevisao(this.revisao)
+          .subscribe( res => {
+            this.router.navigate(['revisoes']);
+          });
+    }
+}
+```
+
+- IMPORTANTE: faça o teste da sua aplicação neste ponto e garanta que o seu cadastro esta funcionando
+
+### Inclusão do campo de seleção dos Clientes
+
+- Alterar o controlador do formulário da Revisão [form-revisao.component.ts](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.ts) para chamar o serviço do Cliente para buscar a lista de clientes que irá preencher o campo de seleção de clientes no formulário
+
+```ts
+import { Component,ElementRef, ViewChild } from '@angular/core';
+import { Revisao } from '../model/revisao';
+import { RevisaoService } from '../service/revisao.service';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+
+import { Cliente } from '../model/cliente'; //ALTERAR AQUI
+import { ClienteService } from '../service/cliente.service'; //ALTERAR AQUI
+
+@Component({
+  selector: 'app-form-revisao',
+  imports: [HttpClientModule, CommonModule, FormsModule],
+  templateUrl: './form-revisao.component.html',
+  styleUrl: './form-revisao.component.css',
+  providers: [RevisaoService, Router, ClienteService] //ALTERAR AQUI
+})
+
+export class FormRevisaoComponent {
+    revisao:Revisao = new Revisao();
+
+    public listaClientes:Cliente[] = []; //ALTERAR AQUI
+
+    constructor(
+      private revisaoService: RevisaoService,
+      private router: Router,
+      private clienteService: ClienteService, //ALTERAR AQUI
+      private activeRouter: ActivatedRoute
+    ) {
+        const id = this.activeRouter.snapshot.paramMap.get('id');
+        
+        //ALTERAR AQUI
+        this.clienteService.getClientes().subscribe(clientes =>{
+            this.listaClientes = clientes;
+        });
+        //ALTERAR AQUI
+
+        if (id) {
+          this.revisaoService.getRevisaoById(id).subscribe(revisao => {
+            this.revisao = revisao;
+        });
+      }
+    }
+
+    salvar(){
+      this.revisaoService.saveRevisao(this.revisao)
+          .subscribe( res => {
+            this.router.navigate(['revisoes']);
+          });
+    }
+
+    //ALTERAR AQUI
+    comparaClientes(obj1: Cliente, obj2: Cliente): boolean {
+      return obj1 && obj2 ? obj1.id === obj2.id : obj1 === obj2;
+    }
+    //ALTERAR AQUI
+}
+```
+
+- Alterar o codigo HTML do componente Form da revisão [form-revisao.component.html](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.html) para incluir o campo de seleção de clientes no formulário
+
+```html
+<main class="container">
+    <h2>Revisão</h2>
+    <div class="card">
+        <div class="card-body">
+            
+            <!-- ALTERAR AQUI -->
+            <div class="form-group">
+                <label for="txtCliente">Cliente</label>
+                <select id="txtCliente" [(ngModel)]="revisao.cliente" class="form-select" [compareWith]="comparaClientes">
+                    <option *ngFor="let umCliente of listaClientes" [ngValue]="umCliente">{{ umCliente.nome }}</option>
+                </select>
+            </div>
+            <!-- ALTERAR AQUI -->
+
+            <div class="form-group">
+                <label for="txtDataEntrada">Data Entrada</label>
+                <input type="date" [(ngModel)]="revisao.dataEntrada" 
+                class="form-control" id="txtDataEntrada">
+            </div>
+
+            <div class="form-group">
+                <label for="txtDataSaida">Data Saída</label>
+                <input type="date" [(ngModel)]="revisao.dataSaida" 
+                class="form-control" id="txtDataSaida">
+            </div>
+
+            <div class="form-group">
+                <label for="txtValor">Valor</label>
+                <input type="number" [(ngModel)]="revisao.valor" 
+                class="form-control" id="txtValor">
+            </div>
+
+            
+        </div>
+
+        <button (click)="salvar()"
+            class="btn btn-primary">Salvar</button>
+
+    </div>
+</main>
+```
+
+### Inclusão das entidades Filho no cadastro Pai-Filhos - Model Peças
+
+- Alterar o HTML formulário da Revisão [form-revisao.component.ts](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.html) para incluir uma tabela do HTML para listar todas as peças de uma revisão
+
+```html
+    
+    <div class="form-group">
+        <label for="txtValor">Valor</label>
+        <input type="number" [(ngModel)]="revisao.valor" 
+        class="form-control" id="txtValor">
+    </div>
+    <!-- INICIO DA ALTERACAO -->
+    <br>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Peças</h5>
+            <a (click)="incluirPeca()" 
+                class="btn btn-secondary">Incluir Peça</a>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Preço Unitário</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let umaPeca of revisao.pecasTrocadas">
+                        <td>{{umaPeca.codigo}}</td>
+                        <td>{{umaPeca.nome}}</td>
+                        <td>{{umaPeca.precoUnitario}}</td>
+                        <td>
+                            <a (click)="excluirPeca(umaPeca)" 
+                                class="btn btn-danger">Excluir</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- FIM DA ALTERACAO -->
+</div>
+
+<button (click)="salvar()"
+    class="btn btn-primary">Salvar</button>
+```
+
+- Alterar o HTML formulário da Revisão [form-revisao.component.ts](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.html) para incluir uma janela modal, que será o formulário de inclusão da peça. IMPORTANTE: incluir este código no final do arquivo
+
+```html
+<div class="modal fade" #myModalPeca tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Peça</h5>
+            </div>
+            <div class="form-group">
+                <label for="txtPecaCodigo">Código</label>
+                <input type="text" [(ngModel)]="peca.codigo" 
+                    class="form-control" id="txtPecaCodigo">
+            </div>
+            <div class="form-group">
+                <label for="txtPecaNome">Nome</label>
+                <input type="text" [(ngModel)]="peca.nome" 
+                    class="form-control" id="txtPecaNome">
+            </div>
+            <div class="form-group">
+                <label for="txtPecaPrecoUnitario">Preço Unitário</label>
+                <input type="number" [(ngModel)]="peca.precoUnitario" 
+                    class="form-control" id="txtPecaPrecoUnitario">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="fecharConfirmacaoPeca()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="salvaPeca()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+```
+- Alterar o arquivo controller do component form Revisao [form-revisao.component.ts](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.ts) para incluir os imports e uma variável que guardará os dados da nova peça digitada
+
+```ts
+import { Cliente } from '../model/cliente';
+import { ClienteService } from '../service/cliente.service';
+
+import { Peca } from '../model/peca'; //ALTERAR AQUI!!!
+import * as bootstrap from 'bootstrap'; //ALTERAR AQUI!!!
+
+@Component({
+  selector: 'app-form-revisao',
+``` 
+
+```ts
+revisao:Revisao = new Revisao();
+
+peca:Peca = new Peca(); //ALTERAR AQUI!!!
+@ViewChild('myModalPeca') modalElementPeca!: ElementRef; //ALTERAR AQUI!!!
+private modalPeca!: bootstrap.Modal; //ALTERAR AQUI!!!
+
+public listaClientes:Cliente[] = [];
+```
+
+- Alterar o arquivo controller do component form Revisao [form-revisao.component.ts](./projfabsoft-frontend/src/app/form-revisao/form-revisao.component.ts) para criar o codigo da função incluirPeca que deverá abrir o modal de cadastro, salvarPeca que deverá incluir a nova peça na lista de itens e excluirPeca que deverá remover a peça da lista.
+
+```ts
+incluirPeca():void{
+  this.peca = new Peca();
+  this.modalPeca = new bootstrap.Modal(this.modalElementPeca.nativeElement);
+  this.modalPeca.show();
+}
+salvaPeca():void{
+  if(this.revisao.pecasTrocadas == null){
+      this.revisao.pecasTrocadas = [];
+  }
+  this.revisao.pecasTrocadas.push(this.peca);
+  this.modalPeca.hide();
+}
+fecharConfirmacaoPeca():void{
+  this.modalPeca.hide();
+}
+
+excluirPeca(peca: Peca): void{
+  this.revisao.pecasTrocadas = 
+    this.revisao.pecasTrocadas.filter((p) => p.id !== peca.id);
+}
+```
+

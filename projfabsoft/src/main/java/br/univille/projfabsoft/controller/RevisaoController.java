@@ -29,7 +29,12 @@ public class RevisaoController {
 
         return new ResponseEntity<List<Revisao>>(listaRevisoes, HttpStatus.OK);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Revisao> getRevisoesById(@PathVariable long id){
+        var umaRevisao = service.getById(id);
 
+        return new ResponseEntity<Revisao>(umaRevisao, HttpStatus.OK);
+    }
     @PostMapping
     public ResponseEntity<Revisao> postRevisao(@RequestBody Revisao revisao){
         if(revisao == null){
