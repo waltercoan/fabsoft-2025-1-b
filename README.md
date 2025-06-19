@@ -683,3 +683,98 @@ confirmarExclusao() {
 }
 ```
 
+## Funcionalidade de MUITOS PARA UM
+
+- Na tela de cadastro de Carros é possível selecionar o Cliente que é o dono
+
+![Exemplo de Tela](./imgs/muitosparaum.png)
+
+- A entidade [Carro](./projfabsoft-frontend/src/app/model/carro.ts) precisa ter um atributo do tipo Cliente
+
+```ts
+
+import { Cliente } from "./cliente";
+
+export class Carro {
+    id: number;
+    marca: string;
+    modelo: string;
+    placa: string;
+    cliente: Cliente
+}
+```
+
+- No controlador do formulário do carro [form-carro.component.ts](./projfabsoft-frontend/src/app/form-carro/form-carro.component.ts) importar o model Cliente e seu serviço
+
+```ts
+//MANTER OS OUTROS IMPORTS
+import { Cliente } from '../model/cliente';
+import { ClienteService } from '../service/cliente.service';
+```
+
+- No controlador do formulário do carro [form-carro.component.ts](./projfabsoft-frontend/src/app/form-carro/form-carro.component.ts) incluir o ClienteService nos providers
+
+```ts
+@Component({
+  selector: 'app-form-carro',
+  imports: [HttpClientModule, CommonModule, FormsModule],
+  templateUrl: './form-carro.component.html',
+  styleUrl: './form-carro.component.css',
+  providers: [CarroService, Router, ClienteService] //ALTERAR AQUI
+})
+```
+
+- No controlador do formulário do carro [form-carro.component.ts](./projfabsoft-frontend/src/app/form-carro/form-carro.component.ts) criar uma variavel lista para guardar os clientes
+
+```ts
+export class FormCarroComponent {
+    carro:Carro = new Carro();
+    
+    public listaClientes:Cliente[] = []; //INCLUIR AQUI
+
+```
+
+- No controlador do formulário do carro [form-carro.component.ts](./projfabsoft-frontend/src/app/form-carro/form-carro.component.ts), no construtor carregar a lista de usuários chamando os serviço do cliente
+
+```ts
+    constructor(
+      private carroService: CarroService,
+      private clienteService: ClienteService, //INCLUIR AQUI
+      private router: Router,
+      private activeRouter: ActivatedRoute
+    ) {
+        const id = this.activeRouter.snapshot.paramMap.get('id');
+        //INCLUIR AQUI
+        this.clienteService.getClientes().subscribe(clientes: =>{
+            this.listaClientes = clientes;
+        });
+        //INCLUIR AQUI
+
+        if (id) {
+          this.carroService.getCarroById(id).subscribe(carro => {
+            this.carro = carro;
+          });
+        }
+    }
+
+```
+
+- No controlador do formulário do carro [form-carro.component.ts](./projfabsoft-frontend/src/app/form-carro/form-carro.component.ts), criar um novo método compararClientes para ensinar o Angular a comparar dois objetos Cliente. Necessário para que o select funcione.
+
+```ts
+  comparaClientes(obj1: Cliente, obj2: Cliente): boolean {
+    return obj1 && obj2 ? obj1.id === obj2.id : obj1 === obj2;
+  }
+```
+
+- Na tela de formulário do Carro [form-carro.component.html](./projfabsoft-frontend/src/app/form-carro/form-carro.component.html) incluir o campo select para listar os clientes em tela.
+
+```html
+<div class="form-group">
+    <label for="txtCliente">Cliente</label>
+    <select id="txtCliente" [(ngModel)]="carro.cliente" class="form-select" [compareWith]="comparaClientes">
+        <option *ngFor="let umCliente of listaClientes" [ngValue]="umCliente">{{ umCliente.nome }}</option>
+    </select>
+</div>
+```
+

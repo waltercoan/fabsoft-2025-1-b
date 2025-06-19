@@ -1,0 +1,37 @@
+<main class="container">
+    <h2>Carro</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label for="txtMarca">Marca</label>
+                <input type="text" [(ngModel)]="carro.marca" 
+                class="form-control" id="txtNome">
+            </div>
+
+            <div class="form-group">
+                <label for="txtModelo">Modelo</label>
+                <input type="text" [(ngModel)]="carro.modelo" 
+                class="form-control" id="txtModelo">
+            </div>
+
+            <div class="form-group">
+                <label for="txtPlaca">Placa</label>
+                <input type="text" [(ngModel)]="carro.placa" 
+                class="form-control" id="txtPlaca">
+            </div>
+
+            <div class="form-group">
+                <label for="txtCliente">Cliente</label>
+                <select id="txtCliente" [(ngModel)]="carro.cliente" class="form-select" [compareWith]="comparaClientes">
+                    <option *ngFor="let umCliente of listaClientes" [ngValue]="umCliente">{{ umCliente.nome }}</option>
+                </select>
+            </div>
+
+            
+        </div>
+
+        <button (click)="salvar()"
+            class="btn btn-primary">Salvar</button>
+
+    </div>
+</main>

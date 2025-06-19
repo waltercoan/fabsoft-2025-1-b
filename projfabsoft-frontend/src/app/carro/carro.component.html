@@ -1,0 +1,51 @@
+<main class="container">
+    <h2>Carros</h2>
+    <a (click)="novo()" class="btn btn-primary">Novo</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Placa</th>
+                <th>Cliente</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let umCarro of listaCarros">
+                <td>{{umCarro.marca}}</td>
+                <td>{{umCarro.modelo}}</td>
+                <td>{{umCarro.placa}}</td>
+                <td>{{umCarro.cliente !== null ? umCarro.cliente.nome : '' }}</td>
+                <td><a (click)="alterar(umCarro)" 
+                    class="btn btn-secondary">Alterar</a>
+                    &nbsp;
+                    <a (click)="abrirConfirmacao(umCarro)" 
+                        class="btn btn-danger">Excluir</a>
+                
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+</main>
+
+
+
+
+<div class="modal fade" #myModal tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir carro</h5>
+            </div>
+            <div class="modal-body">
+            Confirma a exclusão do carro?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharConfirmacao()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="confirmarExclusao()">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>
