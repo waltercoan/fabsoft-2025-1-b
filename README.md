@@ -1,5 +1,7 @@
 # Fábrica de Software 2025/1
 
+## [📲🖥️Front-end](https://fabsoft2025frontend-aud3drfgchfaembt.brazilsouth-01.azurewebsites.net/) [🏬Back-end](https://fabsoft2025-adhtctehd6dwgdht.brazilsouth-01.azurewebsites.net/swagger-ui/index.html)
+
 ## Repositório dos alunos
 - [Repos](https://gist.github.com/d4e37df9f6772173110603fc8bf90b84.git)
 
@@ -1366,3 +1368,140 @@ excluirPeca(peca: Peca): void{
 }
 ```
 
+## Publicação da Aplicação
+
+### Java / Spring Boot
+
+- Alterar o arquivo [pom.xml](./projfabsoft/pom.xml) para incluir a dependência da biblioteca do SQL Server
+
+```xml
+<dependency>
+  <groupId>com.microsoft.sqlserver</groupId>
+  <artifactId>mssql-jdbc</artifactId>
+  <scope>runtime</scope>
+</dependency>
+```
+
+- Criar um novo arquivo na pasta [/src/main/resources/application-prod.properties](./projfabsoft/src/main/resources/application-prod.properties) com as configuracões para conectar no banco do Microsft SQL Server lindo ❤️
+
+```json
+spring.application.name=projfabsoft
+
+spring.jpa.database-platform=org.hibernate.dialect.SQLServerDialect
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.datasource.url=${DB_CONNECTION_STRING}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+```
+
+### Angular
+
+- Criar na raiz do projeto [projfabsoft_frontend/Dockerfile](./projfabsoft_frontend/Dockerfile) para fazer o build da aplicação front-end no formato de um container Docker
+
+- IMPORTANTE: substituir dentro do arquivo projfabsoft_frontend pelo nome da pasta do seu projeto,
+caso seja diferente
+
+```docker
+# Stage 1: Build
+FROM node:18 AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+RUN npm install -g @angular/cli
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the Angular application
+RUN ng build
+
+# Stage 2: Production
+FROM nginx:alpine AS production
+
+# Set working directory
+WORKDIR /usr/share/nginx/html
+
+# Copy built files from the previous stage
+COPY --from=build /app/dist/projfabsoft_frontend/browser /usr/share/nginx/html
+
+# Copiar o arquivo environment.runtime.js
+COPY src/assets/environment.runtime.js /usr/share/nginx/html/assets/environment.runtime.js
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx server and execute sed command
+CMD ["/bin/sh", "-c", "sed -i 's|http://localhost:8080/api/v1|'\"$API_URL\"'|g' /usr/share/nginx/html/assets/environment.runtime.js && nginx -g 'daemon off;'"]
+```
+
+- Criar dentro da pasta do projeto front-end um novo arquivo na pasta [/src/assets/environment.runtime.js](./projfabsoft_frontend/src/assets/environment.runtime.js) com o seguinte codigo
+
+```js
+window.env = {
+  apiUrl: 'http://localhost:8080/api/v1' // Valor padrão
+};
+```
+
+- Modificar todos os arquivos arquivos SERVICE de seu projeto para trocar a URL padrão da API back-end conforme exemplo
+
+```ts
+apiBase = (window as any).env.apiUrl;
+apiURL = (this.apiBase !== null ? this.apiBase : 'http://localhost:8080/api/v1/carros') + "/carros";
+```
+
+- Modificar o arquivo [angular.json](./projfabsoft_frontend/angular.json) para servir o arquivo dentro da pasta /src/assets
+
+```json
+"assets": [
+  {
+    "glob": "**/*",
+    "input": "public"
+  },
+  {
+    "glob": "**/*",
+    "input": "src/assets/",
+    "output": "assets"
+  }
+],
+``` 
+
+### Github Actions
+
+- Modificar o arquivo .github/workflows/buildbackend.yml para fazer o build do container Docker do projeto Angular front-end
+
+```yml
+      # Build and push Docker image to GitHub Container Registry
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/projfabsoft:latest ./projfabsoft
+          docker push ghcr.io/${{ github.repository }}/projfabsoft:latest
+          docker build -t ghcr.io/${{ github.repository }}/projfabsoft-frontend:latest ./projfabsoft_frontend
+          docker push ghcr.io/${{ github.repository }}/projfabsoft-frontend:latest
+```
+- Fazer o commit e push da aplicação na branch main
+
+### Azure lindo ❤️
+
+- Criar uma instância do Azure SQL utilizando a oferta gratuita
+- Criar uma instância do Azure Web App no free tier para servir o back-end em Java, informando as seguintes variáveis de ambiente
+
+```bash
+SPRING_PROFILES_ACTIVE=prod
+DB_CONNECTION_STRING
+DB_USERNAME
+DB_PASSWORD
+```
+
+- Criar uma segunda instância do Azure Web App, selecionando o mesmo Service Plan criado no free tier no passo anterior, para servir o front-end em angular e informando a seguinte variável de ambiente
+
+```bash
+API_URL=https://<ENDERECO DO WEB APP DO BACKEND>/api/v1
+```
