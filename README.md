@@ -747,7 +747,7 @@ export class FormCarroComponent {
     ) {
         const id = this.activeRouter.snapshot.paramMap.get('id');
         //INCLUIR AQUI
-        this.clienteService.getClientes().subscribe(clientes: =>{
+        this.clienteService.getClientes().subscribe(clientes =>{
             this.listaClientes = clientes;
         });
         //INCLUIR AQUI
@@ -1504,4 +1504,58 @@ DB_PASSWORD
 
 ```bash
 API_URL=https://<ENDERECO DO WEB APP DO BACKEND>/api/v1
+```
+
+## Gráficos
+
+- Instalar os pacotes
+
+```bash
+npm install ng2-charts --legacy-peer-deps
+npm install chart.js --legacy-peer-deps
+```
+- Documentação da biblioteca [https://github.com/valor-software/ng2-charts?tab=readme-ov-file](https://github.com/valor-software/ng2-charts?tab=readme-ov-file)
+
+- No HTML do componente incluir o tag canvas apontando para as variáveis que contem os dados do gráfico
+
+```html
+<canvas baseChart
+                [datasets]="chartData.datasets"
+                [labels]="chartData.labels"
+                [options]="chartOptions"
+                [legend]="true"
+                [type]="'bar'">
+        </canvas>
+```
+
+- No arquivo controller do componente, importas as bibliotecas do componente, e depois criar uma instância da classe ChartConfiguration com os dados a serem plotados
+
+```ts
+import { Component } from '@angular/core';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts'; //ALTERAR AQUI
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts'; //ALTERAR AQUI
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.css',
+  imports: [BaseChartDirective], //ALTERAR AQUI
+  providers: [provideCharts(withDefaultRegisterables())] //ALTERAR AQUI
+})
+export class HomeComponent {
+  //ALTERAR AQUI
+  public chartData: ChartConfiguration['data'] = {
+    labels: ['Janeiro', 'Fevereiro', 'Março'],
+    datasets: [
+      { data: [65, 59, 80], label: 'Vendas' },
+      { data: [165, 159, 180], label: 'Pedidos' }
+    ],
+  };
+
+  public chartOptions: ChartOptions = {
+    responsive: true,
+  };
+  //ALTERAR AQUI
+}
 ```
