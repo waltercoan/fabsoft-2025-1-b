@@ -1435,11 +1435,28 @@ COPY --from=build /app/dist/projfabsoft_frontend/browser /usr/share/nginx/html
 # Copiar o arquivo environment.runtime.js
 COPY src/assets/environment.runtime.js /usr/share/nginx/html/assets/environment.runtime.js
 
+# Custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 
 # Start Nginx server and execute sed command
 CMD ["/bin/sh", "-c", "sed -i 's|http://localhost:8080/api/v1|'\"$API_URL\"'|g' /usr/share/nginx/html/assets/environment.runtime.js && nginx -g 'daemon off;'"]
+```
+
+- Criar na pasta do projeto front-end um arquivo novo com o nome [default.conf](./projfabsoft_frontend/nginx.conf) contendo o seguite código
+
+```bash
+server {
+    server_name my-app;
+
+    root /usr/share/nginx/html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
 ```
 
 - Criar dentro da pasta do projeto front-end um novo arquivo na pasta [/src/assets/environment.runtime.js](./projfabsoft_frontend/src/assets/environment.runtime.js) com o seguinte codigo

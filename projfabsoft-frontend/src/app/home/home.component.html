@@ -1,0 +1,31 @@
+<div class="container">
+  <h2>Exemplo de Gráfico</h2>
+  <div class="d-md-flex justify-content-lg-evenly overflow-scroll">
+    <div class="card" style="width:40%;">
+        <div class="card-body">
+        <h5 class="card-title">Gráfico de Barras</h5>
+        <canvas baseChart
+                [datasets]="chartData.datasets"
+                [labels]="chartData.labels"
+                [options]="chartOptions"
+                [legend]="true"
+                [type]="'bar'">
+        </canvas>
+        </div>
+    </div>
+    <div class="card" style="width:40%;">
+        <div class="card-body">
+        <h5 class="card-title">Gráfico de Linha</h5>
+        <canvas baseChart
+                [datasets]="chartData.datasets"
+                [labels]="chartData.labels"
+                [options]="chartOptions"
+                [legend]="true"
+                [type]="'line'">
+        </canvas>
+        </div>
+    </div>
+
+  </div>
+  
+</div>
