@@ -30,6 +30,12 @@ public class CarroController {
 
         return new ResponseEntity<List<Carro>>(listaCarros, HttpStatus.OK);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Carro> getCarroById(@PathVariable long id){
+        var umCarro = service.getById(id);
+
+        return new ResponseEntity<Carro>(umCarro, HttpStatus.OK);
+    }
 
     @PostMapping
     public ResponseEntity<Carro> postCarro(@RequestBody Carro Carro){

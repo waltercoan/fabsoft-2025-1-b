@@ -1,11 +1,13 @@
 package br.univille.projfabsoft.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 
 @Entity
 public class Carro {
@@ -17,7 +19,35 @@ public class Carro {
     private String placa;
     @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REFRESH})
     private Cliente cliente;
+    @Transient
+    private String foto;
+    
+    private String arquivoFoto;
+    private String mimeType;
 
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getArquivoFoto() {
+        return arquivoFoto;
+    }
+
+    public void setArquivoFoto(String arquivoFoto) {
+        this.arquivoFoto = arquivoFoto;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
 
     public Cliente getCliente() {
         return cliente;

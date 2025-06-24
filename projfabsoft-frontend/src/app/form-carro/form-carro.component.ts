@@ -51,5 +51,19 @@ export class FormCarroComponent {
       return obj1 && obj2 ? obj1.id === obj2.id : obj1 === obj2;
     }
 
+    onFileSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64String = reader.result as string;
+              this.carro.foto = base64String.split(',')[1]; 
+              this.carro.arquivoFoto = file.name; 
+              this.carro.mimeType = file.type;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 }
 

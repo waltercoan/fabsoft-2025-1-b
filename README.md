@@ -1827,3 +1827,226 @@ export class ChatComponent implements OnInit {
 }
 
 ```
+
+
+## Implementação UPLOAD de imagens
+
+- IMPORTANTE: esse exemplo de UPLOAD de imagem não é a solução ótima principalmente considerando a execução do software em ambiente de nuvem, há necessidade de integrar com um object storage.
+
+### Java / Spring Boot
+
+- Altera o arquivo de entidade para incluir os seguintes atributos [Carro.java](./projfabsoft/src/main/java/br/univille/projfabsoft/entity/Carro.java)
+
+```java
+    @Transient
+    private String foto;
+    
+    private String arquivoFoto;
+    private String mimeType;
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getArquivoFoto() {
+        return arquivoFoto;
+    }
+
+    public void setArquivoFoto(String arquivoFoto) {
+        this.arquivoFoto = arquivoFoto;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+```
+
+- Alterar o codigo da implementação do Serviço para que possa salvar os arquivos de imagem no disco do servidor e carregar o arquivo do disco do servidor [CarroServiceImpl.java](./projfabsoft/src/main/java/br/univille/projfabsoft/service/impl/CarroServiceImpl.java)
+
+```java
+    @Value("${fabrica2025.tempfolder}")
+    private String tempFolder;
+    private Path root = null;
+
+    private void saveFoto(Carro carro){
+
+        if(carro.getFoto() == null || carro.getFoto().equals("")){
+            return;
+        }
+
+        if (!carro.getMimeType().startsWith("image/")) {
+            return;
+        }
+
+        byte[] imageBytes = Base64.getDecoder().decode(carro.getFoto());
+        InputStream imageStream = new ByteArrayInputStream(imageBytes);
+
+        File dir = new File(tempFolder);
+        if (! dir.exists()){
+            dir.mkdir();
+        }
+
+        root = Paths.get(tempFolder);
+        UUID uuid = UUID.randomUUID();
+        String novoNome = String.format("%s.%s", uuid.toString(), carro.getArquivoFoto().split("\\.")[1]);
+        Path nomeArquivo = this.root.resolve(novoNome);
+        try {
+            Files.copy(imageStream, nomeArquivo);
+        } catch (Exception e) {
+            throw new RuntimeException("Não foi possível salvar o arquivo. Error: " + e.getMessage());
+        }
+        carro.setArquivoFoto(nomeArquivo.toAbsolutePath().toString());
+    }
+
+    private Carro carregaFoto(Carro carro){
+        if(carro.getArquivoFoto() == null || carro.getArquivoFoto().equals("")){
+            return carro;
+        }
+
+        File file = new File(carro.getArquivoFoto());
+        if(!file.exists()){
+            return carro;
+        }
+
+        try {
+            byte[] imageBytes = Files.readAllBytes(file.toPath());
+            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+            carro.setFoto(base64Image);
+        } catch (Exception e) {
+            throw new RuntimeException("Não foi possível carregar a foto. Error: " + e.getMessage());
+        }
+        
+        return carro;
+    }
+```
+
+- Alterar o codigo da implementação do mesmo Serviço [CarroServiceImpl.java](./projfabsoft/src/main/java/br/univille/projfabsoft/service/impl/CarroServiceImpl.java) que o método save, chame o método para salvar a foto
+
+```java
+    @Override
+    public Carro save(Carro carro) {
+        saveFoto(carro);
+        repository.save(carro);
+        return carro;
+    }
+```
+
+- Alterar o codigo da implementação do mesmo Serviço [CarroServiceImpl.java](./projfabsoft/src/main/java/br/univille/projfabsoft/service/impl/CarroServiceImpl.java) que os métodos que fazem busca no banco de dados, possam carregar o arquivo da foto
+
+```java
+    @Override
+    public List<Carro> getAll() {
+        var listaCarros = repository.findAll();
+        listaCarros.stream()
+            .filter(carro -> carro.getArquivoFoto() != null && !carro.getArquivoFoto().isEmpty())
+            .forEach(this::carregaFoto);
+        return repository.findAll();
+    }
+
+    @Override
+    public Carro getById(Long id) {
+        var retorno = repository.findById(id);
+        if(retorno.isPresent()){
+            var umCarro = retorno.get();
+            carregaFoto(umCarro);
+            return umCarro;
+        }
+        return null;
+    }
+```
+
+- Alterar o arquivo [application.properties](./projfabsoft/src/main/resources/application.properties) para incluir uma variável que aponte para a pasta no servidor onde os arquivos de imagem serão salvos
+
+```bash
+fabrica2025.tempfolder=\\tmp\\images
+```
+
+### Typescript / Angular
+
+- Alterar o arquivo de model para incluir os atributos para guardar os dados da imagem [carro.ts](./projfabsoft-frontend/src/app/model/carro.ts)
+
+```ts
+import { Cliente } from "./cliente";
+
+export class Carro {
+    id: number;
+    marca: string;
+    modelo: string;
+    placa: string;
+    cliente: Cliente;
+    foto: string; //ALTERAR AQUI
+    arquivoFoto: string; //ALTERAR AQUI
+    mimeType: string; //ALTERAR AQUI
+}
+```
+
+- Alterar o formulário para incluir o botão de seleção da imagem [form-carro.component.html](./projfabsoft-frontend/src/app/form-carro/form-carro.component.html)
+
+
+```html
+<div class="form-group">
+    <label for="fileImagem">Imagem</label>
+    <input type="file" (change)="onFileSelected($event)" class="form-control" id="fileImagem" accept="image/*">
+</div>
+```
+
+- Alterar o controlador do fomulário para carregar o arquivo da imagem, converter em Base64 e incluir nos atributos da classe model
+
+```ts
+onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          this.carro.foto = base64String.split(',')[1]; 
+          this.carro.arquivoFoto = file.name; 
+          this.carro.mimeType = file.type;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+```
+
+- Alterar o componente da tela principal para mostrar a imagem carregada [carro.component.html](./projfabsoft-frontend/src/app/carro/carro.component.html)
+
+```html
+<table class="table">
+        <thead>
+            <tr>
+                <th></th> <!-- Alterar aqui -->
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Placa</th>
+                <th>Cliente</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let umCarro of listaCarros">
+                <td><img src="data:{{umCarro.mimeType}};base64,{{umCarro.foto}}" width="200px;"></td> <!-- Alterar aqui -->
+                <td>{{umCarro.marca}}</td>
+                <td>{{umCarro.modelo}}</td>
+                <td>{{umCarro.placa}}</td>
+                <td>{{umCarro.cliente !== null ? umCarro.cliente.nome : '' }}</td>
+                <td><a (click)="alterar(umCarro)" 
+                    class="btn btn-secondary">Alterar</a>
+                    &nbsp;
+                    <a (click)="abrirConfirmacao(umCarro)" 
+                        class="btn btn-danger">Excluir</a>
+                
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+```

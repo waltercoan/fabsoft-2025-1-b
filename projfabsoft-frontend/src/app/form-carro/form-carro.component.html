@@ -26,8 +26,10 @@
                     <option *ngFor="let umCliente of listaClientes" [ngValue]="umCliente">{{ umCliente.nome }}</option>
                 </select>
             </div>
-
-            
+            <div class="form-group">
+                <label for="fileImagem">Imagem</label>
+                <input type="file" (change)="onFileSelected($event)" class="form-control" id="fileImagem" accept="image/*">
+            </div>
         </div>
 
         <button (click)="salvar()"
