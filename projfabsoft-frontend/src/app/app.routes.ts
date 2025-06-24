@@ -6,6 +6,7 @@ import { FormCarroComponent } from './form-carro/form-carro.component';
 import { RevisaoComponent } from './revisao/revisao.component';
 import { FormRevisaoComponent } from './form-revisao/form-revisao.component';
 import { HomeComponent } from './home/home.component';
+import { ChatComponent } from './chat/chat.component';
 
 export const routes: Routes = [
     { path: 'clientes', component: ClienteComponent},
@@ -21,5 +22,7 @@ export const routes: Routes = [
     {path: 'revisoes/alterar/:id', component: FormRevisaoComponent},
     
     {path: '', component: HomeComponent},
+    
+    {path: 'chat', component: ChatComponent}
 
 ];

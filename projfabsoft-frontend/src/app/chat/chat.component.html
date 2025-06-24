@@ -1,0 +1,37 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Chat</h5>
+    </div>
+    <div class="card-body" style="height: 400px; overflow-y: auto;" #chatContainer>
+      
+      
+    </div>
+    <div class="card-footer">
+      <div class="input-group">
+        <input type="text" class="form-control" [(ngModel)]="textoMensagem" 
+               placeholder="Digite sua mensagem..." 
+               (keyup.enter)="clickEnviar()" />
+        <button class="btn btn-primary" type="button" (click)="clickEnviar()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div #suaMensagem class="d-flex justify-content-end mb-3 d-none">
+    <div class="me-3">
+        <div class="p-2 bg-primary text-white rounded msg"></div>
+    </div>
+    <div>
+        <span class="badge bg-secondary">Você</span>
+    </div>
+</div>
+
+<div #userMensagem class="d-flex mb-3 d-none">
+    <div class="me-3">
+        <span class="badge bg-secondary">User 1</span>
+    </div>
+    <div class="flex-grow-1">
+        <div class="p-2 bg-light rounded msg"></div>
+    </div>
+</div>

@@ -1397,9 +1397,9 @@ spring.jpa.hibernate.ddl-auto=update
 
 ### Angular
 
-- Criar na raiz do projeto [projfabsoft_frontend/Dockerfile](./projfabsoft_frontend/Dockerfile) para fazer o build da aplicação front-end no formato de um container Docker
+- Criar na raiz do projeto [projfabsoft-frontend/Dockerfile](./projfabsoft-frontend/Dockerfile) para fazer o build da aplicação front-end no formato de um container Docker
 
-- IMPORTANTE: substituir dentro do arquivo projfabsoft_frontend pelo nome da pasta do seu projeto,
+- IMPORTANTE: substituir dentro do arquivo projfabsoft-frontend pelo nome da pasta do seu projeto,
 caso seja diferente
 
 ```docker
@@ -1430,7 +1430,7 @@ FROM nginx:alpine AS production
 WORKDIR /usr/share/nginx/html
 
 # Copy built files from the previous stage
-COPY --from=build /app/dist/projfabsoft_frontend/browser /usr/share/nginx/html
+COPY --from=build /app/dist/projfabsoft-frontend/browser /usr/share/nginx/html
 
 # Copiar o arquivo environment.runtime.js
 COPY src/assets/environment.runtime.js /usr/share/nginx/html/assets/environment.runtime.js
@@ -1445,7 +1445,7 @@ EXPOSE 80
 CMD ["/bin/sh", "-c", "sed -i 's|http://localhost:8080/api/v1|'\"$API_URL\"'|g' /usr/share/nginx/html/assets/environment.runtime.js && nginx -g 'daemon off;'"]
 ```
 
-- Criar na pasta do projeto front-end um arquivo novo com o nome [default.conf](./projfabsoft_frontend/nginx.conf) contendo o seguite código
+- Criar na pasta do projeto front-end um arquivo novo com o nome [default.conf](./projfabsoft-frontend/nginx.conf) contendo o seguite código
 
 ```bash
 server {
@@ -1459,7 +1459,7 @@ server {
 }
 ```
 
-- Criar dentro da pasta do projeto front-end um novo arquivo na pasta [/src/assets/environment.runtime.js](./projfabsoft_frontend/src/assets/environment.runtime.js) com o seguinte codigo
+- Criar dentro da pasta do projeto front-end um novo arquivo na pasta [/src/assets/environment.runtime.js](./projfabsoft-frontend/src/assets/environment.runtime.js) com o seguinte codigo
 
 ```js
 window.env = {
@@ -1474,7 +1474,7 @@ apiBase = (window as any).env.apiUrl;
 apiURL = (this.apiBase !== null ? this.apiBase : 'http://localhost:8080/api/v1/carros') + "/carros";
 ```
 
-- Modificar o arquivo [angular.json](./projfabsoft_frontend/angular.json) para servir o arquivo dentro da pasta /src/assets
+- Modificar o arquivo [angular.json](./projfabsoft-frontend/angular.json) para servir o arquivo dentro da pasta /src/assets
 
 ```json
 "assets": [
@@ -1500,7 +1500,7 @@ apiURL = (this.apiBase !== null ? this.apiBase : 'http://localhost:8080/api/v1/c
         run: |
           docker build -t ghcr.io/${{ github.repository }}/projfabsoft:latest ./projfabsoft
           docker push ghcr.io/${{ github.repository }}/projfabsoft:latest
-          docker build -t ghcr.io/${{ github.repository }}/projfabsoft-frontend:latest ./projfabsoft_frontend
+          docker build -t ghcr.io/${{ github.repository }}/projfabsoft-frontend:latest ./projfabsoft-frontend
           docker push ghcr.io/${{ github.repository }}/projfabsoft-frontend:latest
 ```
 - Fazer o commit e push da aplicação na branch main
@@ -1575,4 +1575,255 @@ export class HomeComponent {
   };
   //ALTERAR AQUI
 }
+```
+
+## Implementação de um CHAT com WebSocket
+
+### Java / Spring Boot
+
+- Alterar o arquivo [pom.xml](./projfabsoft/pom.xml) para incluir a dependência
+
+```bash
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-websocket</artifactId>
+</dependency>
+```
+
+- Criar um novo arquivo na pasta [java/br/univille/projfabsoft/config/WebSocketConfig.java](./projfabsoft/src/main/java/br/univille/projfabsoft/config/WebSocketConfig.java) com o seguinte código
+
+```java
+package br.univille.projfabsoft.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import br.univille.projfabsoft.controller.ChatController;
+
+@Configuration
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(new ChatController(), "/ws/chat").setAllowedOrigins("*");
+    }
+}
+```
+
+- Criar um novo arquivo na pasta [java/br/univille/projfabsoft/controller/ChatController.java](./projfabsoft/src/main/java/br/univille/projfabsoft/controller/ChatController.java) que será o servidor para que os clientes se conectem para enviar e receber mensagens.
+
+
+```java
+package br.univille.projfabsoft.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+@Controller
+@RequestMapping("/ws/chat")
+public class ChatController extends TextWebSocketHandler {
+
+    private final Set<WebSocketSession> sessions = Collections.synchronizedSet(new HashSet<>());
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        sessions.add(session);
+    }
+
+    @Override
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        System.out.println("Received message: " + message.getPayload());
+        synchronized (sessions) {
+            for (WebSocketSession webSocketSession : sessions) {
+                if (webSocketSession.isOpen()) {
+                    if(webSocketSession.getId().equals(session.getId())) {
+                        continue;
+                    }
+                    webSocketSession.sendMessage(new TextMessage(message.getPayload()));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, org.springframework.web.socket.CloseStatus status) throws Exception {
+        sessions.remove(session);
+    }
+}
+```
+
+### Typescript / Angular
+
+- Criar um novo arquivo chamado [chat.service.ts](./projfabsoft-frontend/src/app/service/chat.service.ts) para conectar no servidor WebSocket do back-end.
+
+```ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ChatService {
+  private socket!: WebSocket;
+  private messageCallback!: (message: string) => void;
+
+  apiBase = (window as any).env.apiUrl.replace('/api/v1','').replace('https://','').replace('http://','');
+  apiURL = (this.apiBase !== null ? ('wss://' + this.apiBase) : 'ws://localhost:8080') + "/ws/chat";
+  
+  constructor() { }
+
+  connect(): void {
+    this.socket = new WebSocket(this.apiURL);
+
+    this.socket.onopen = () => {
+      console.log('WebSocket connection established.');
+    };
+
+    this.socket.onmessage = (event) => {
+      console.log('Message received from server:', event.data);
+      if (this.messageCallback) {
+        this.messageCallback(event.data);
+      }
+    };
+
+    this.socket.onclose = () => {
+      console.log('WebSocket connection closed.');
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  }
+
+  onMessage(callback: (message: string) => void): void {
+    this.messageCallback = callback;
+  }
+
+  sendMessage(message: string): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(message);
+    } else {
+      console.error('WebSocket is not open. Unable to send message.');
+    }
+  }
+
+  disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+    }
+  }
+}
+```
+
+- Criar um novo componente chamado chat
+
+- Código da interface gráfica do component [chat.component.html](./projfabsoft-frontend/src/app/chat/chat.component.html)
+
+```html
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Chat</h5>
+    </div>
+    <div class="card-body" style="height: 400px; overflow-y: auto;" #chatContainer>
+      
+      
+    </div>
+    <div class="card-footer">
+      <div class="input-group">
+        <input type="text" class="form-control" [(ngModel)]="textoMensagem" 
+               placeholder="Digite sua mensagem..." 
+               (keyup.enter)="clickEnviar()" />
+        <button class="btn btn-primary" type="button" (click)="clickEnviar()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div #suaMensagem class="d-flex justify-content-end mb-3 d-none">
+    <div class="me-3">
+        <div class="p-2 bg-primary text-white rounded msg"></div>
+    </div>
+    <div>
+        <span class="badge bg-secondary">Você</span>
+    </div>
+</div>
+
+<div #userMensagem class="d-flex mb-3 d-none">
+    <div class="me-3">
+        <span class="badge bg-secondary">User 1</span>
+    </div>
+    <div class="flex-grow-1">
+        <div class="p-2 bg-light rounded msg"></div>
+    </div>
+</div>
+```
+
+- Código do controlador do component [chat.component.ts](./projfabsoft-frontend/src/app/chat/chat.component.ts) para controlar a interface para envio das mensagens e para atualizar a interface ao receber uma mensagem
+
+```ts
+import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ChatService } from '../service/chat.service';
+
+@Component({
+  selector: 'app-chat',
+  imports: [FormsModule],
+  templateUrl: './chat.component.html',
+  styleUrl: './chat.component.css',
+  providers: [ChatService]
+})
+export class ChatComponent implements OnInit {
+    dynamicContent: string = '';
+    textoMensagem: string = '';
+
+    @ViewChild('suaMensagem') htmlSuaMensagem!: ElementRef;
+    @ViewChild('userMensagem') htmlUserMensagem!: ElementRef;
+    @ViewChild('chatContainer') chatContainer!: ElementRef;
+
+    constructor(private chatService: ChatService) {}
+
+    ngOnInit(): void {
+        // Conecta ao WebSocket e registra o callback para receber mensagens
+        this.chatService.connect();
+        this.chatService.onMessage((msg: string) => {
+            this.receberMensagem(msg);
+        });
+    }
+
+    clickEnviar() {
+        const mensagem = this.htmlSuaMensagem.nativeElement.cloneNode(true);
+        mensagem.classList.remove('d-none');
+        mensagem.querySelector('.msg').textContent = this.textoMensagem;
+        this.chatContainer.nativeElement.appendChild(mensagem);
+
+        // Envia a mensagem pelo serviço do chat
+        this.chatService.sendMessage(this.textoMensagem);
+
+        this.textoMensagem = '';
+        this.scrollToBottom();
+    }
+
+    receberMensagem(msg: string) {
+        const mensagem = this.htmlUserMensagem.nativeElement.cloneNode(true);
+        mensagem.classList.remove('d-none');
+        mensagem.querySelector('.msg').textContent = msg;
+        this.chatContainer.nativeElement.appendChild(mensagem);
+        this.scrollToBottom();
+    }
+
+    private scrollToBottom(): void {
+        const container = this.chatContainer.nativeElement;
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
 ```
